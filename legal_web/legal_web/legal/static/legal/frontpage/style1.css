@@ -46,6 +46,7 @@ form {
             animation: fadeup .5s .5s ease both;
     -webkit-transform: translateY(20px);
             transform: translateY(20px);
+            transition: transform .5s .5s ease;
   }
 
   #drop-area {
@@ -87,4 +88,19 @@ form {
   }
   #fileElem {
     display: none;
+  }
+
+  @-webkit-keyframes fadeup {
+    to {
+      -webkit-transform: translateY(0);
+              transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes fadeup {
+    to {
+      -webkit-transform: translateY(0);
+              transform: translateY(0);
+      opacity: 1;
+    }
   }
