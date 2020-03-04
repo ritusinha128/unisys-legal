@@ -103,118 +103,99 @@ var BingSpeech;
             };
             window.addEventListener('touchend', unlockaudio, false);
         }
-        /**setluismsg() {
-            $.post("https://centralindia.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
-            {
-                "Ocp-Apim-Subscription-Key": this.apiKey,
-                "Access-Control-Allow-Origin": "*"
-            },
-            function(data){
-                console.log(data);
-                newAuthToken = data;
-                alert("Data: " + data);
-            });
-        }**/
-        checkAuthToken() {
-            return __awaiter(this, void 0, void 0, function* () {
-                var timeElapsed = (Date.now() - this._tokenTime) / 1000;
-                // Doc: https://www.microsoft.com/cognitive-services/en-us/Speech-api/documentation/API-Reference-REST/BingVoiceRecognition says
-                // that "the token has an expiry time of 10 minutes". Let's generate it after 500s to be secure. 
-                if (this.authToken === "" || timeElapsed > 500) {
-                    var newAuthToken = "";
-                    var optionalHeaders = [{ name: "Ocp-Apim-Subscription-Key", value: this.apiKey },
-                        // required for Firefox otherwise a CORS error is raised
-                        { name: "Access-Control-Allow-Origin", value: "*" }];
-                    try {
-                        var resultsText = yield this.makeHttpRequest("POST", "https://centralindia.api.cognitive.microsoft.com/sts/v1.0/issuetoken", optionalHeaders);
-                        newAuthToken = resultsText;
-                        this._tokenTime = Date.now();
-                        console.log("New authentication token generated.");
-                    }
-                    catch (ex) {
-                        console.error("Error issuing token. Did you provide a valid Bing Speech API key?");
-                    }
-                    this.authToken = newAuthToken;
-                }
-            });
-        }
-       
 
-        makeHttpRequest(actionType, url, isArrayBuffer = false, optionalHeaders, dataToSend) {
-            return __awaiter(this, void 0, void 0, function* () {
-                return new Promise((resolve, reject) => {
-                    var xhr = new XMLHttpRequest();
-                    if (isArrayBuffer) {
-                        xhr.responseType = 'arraybuffer';
-                    }
-                    xhr.onreadystatechange = function (event) {
-                        if (xhr.readyState !== 4)
+        checkAuthToken() {
+            var timeElapsed = (Date.now() - this._tokenTime) / 1000;
+            // Doc: https://www.microsoft.com/cognitive-services/en-us/Speech-api/documentation/API-Reference-REST/BingVoiceRecognition says
+            // that "the token has an expiry time of 10 minutes". Let's generate it after 500s to be secure. 
+            if (this.authToken === "" || timeElapsed > 500) {
+                  var newAuthToken = "";
+                  var optionalHeaders = [
+                  { name: "Ocp-Apim-Subscription-Key", value: this.apiKey },
+                  { name: "Access-Control-Allow-Origin", value: "*" }];
+      
+                  try {
+                        this.makeHttpRequest("POST", "https://centralindia.api.cognitive.microsoft.com/sts/v1.0/issuetoken", false, optionalHeaders).then((response) => {
+                        console.log(response);
+                        newAuthToken = response;
+                        this.authToken = newAuthToken;
+                        this._tokenTime = Date.now();
+                        console.log("New authentication token generated."+ this.authToken);
+                    }).catch(err => console.log(err))
+                  }
+                  catch (ex) {
+                        console.error("Error issuing token. Did you provide a valid Bing Speech API key?");
+                  }
+                  //this.authToken = newAuthToken; // maybe put this inside the then
+            }
+      }
+      
+      
+      makeHttpRequest(actionType, url, isArrayBuffer = false, optionalHeaders, dataToSend) {
+            return new Promise((resolve, reject) => {
+                var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+                if (isArrayBuffer) {
+                    xhr.responseType = 'arraybuffer';
+                }
+                xhr.open(actionType, url);
+                xhr.onreadystatechange = function (event) {
+                        if (xhr.readyState !== 4) {
+                            console.log("ready state not equal 4")
                             return;
+
+                        }
                         if (xhr.status >= 200 && xhr.status < 300) {
-                            if (!isArrayBuffer) {
-                                resolve(xhr.responseText);
-                            }
-                            else {
-                                resolve(xhr.response);
-                            }
+                              if (!isArrayBuffer) {
+                                console.log(xhr.responseText)
+                                return resolve(xhr.responseText);
+                              }
+                              else {
+                                console.log(xhr.response)
+                                return resolve(xhr.response);
+                              }
                         }
                         else {
-                            reject(xhr.status);
+                            console.log("readyState error")
+                            return reject(xhr.status);
                         }
-                    };
-                    try {
-                        xhr.open(actionType, url, true);
+                  };
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                //xhr.setRequestHeader('Ocp-Apim-Subscription-Key', this.apiKey);
+                //xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+                if (optionalHeaders) {
+                    optionalHeaders.forEach((header) => {
+                        xhr.setRequestHeader(header.name, header.value);
+                    });
+                }
+                if (dataToSend) {
+                    xhr.send(dataToSend);
+                }
+                else {
+                    xhr.send();
+                }
+                  /*try {
+                        xhr.open(actionType, url);
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                         if (optionalHeaders) {
-                            optionalHeaders.forEach((header) => {
-                                xhr.setRequestHeader(header.name, header.value);
-                            });
+                              optionalHeaders.forEach((header) => {
+                                    xhr.setRequestHeader(header.name, header.value);
+                              });
                         }
                         if (dataToSend) {
-                            xhr.send(dataToSend);
+                              xhr.send(dataToSend);
                         }
                         else {
-                            xhr.send();
+                              xhr.send();
                         }
-                    }
-                    catch (ex) {
-                        reject(ex);
-                    }
+                  }
+                  catch (ex) {
+                        return reject(ex);
+                  }*/
                 });
-            });
-        }
-        /*
-        makeHttpRequest(actionType, url, optionalHeaders, dataToSend)
-        {
-            return __awaiter(this, void 0, void 0, function* () {
-                return new Promise((resolve, reject) => {
-                    var xhr = new XMLHttpRequest();
-                    xhr.onreadystatechange = function (event) {
-                        if (xhr.readyState !== 4)
-                            return;
-                        else {
-                            reject(xhr.status);
-                        }
-                    };
-                    try {
-                        xhr.open(actionType, url, true);
-                        if (optionalHeaders) {
-                            optionalHeaders.forEach((header) => {
-                                xhr.setRequestHeader(header.name, header.value);
-                            });
-                        }
-                        if (dataToSend) {
-                            xhr.send(dataToSend);
-                        }
-                        else {
-                            xhr.send();
-                        }
-                    }
-                    catch (ex) {
-                        reject(ex);
-                    }
-                });
-            });
-        }*/
+            }
+        
     }
     class Guid {
         static generateString() {
@@ -337,6 +318,7 @@ var BingSpeech;
                         error = true;
                         textAnswer = "!Error during recognition!";
                     }
+                    console.log(textAnswer);
                     let index = 0;
                     for (index = 0; index < this._actualRequests.length; index++) {
                         if (this._actualRequests[index].requestId === requestId) {
