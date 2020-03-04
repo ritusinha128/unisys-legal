@@ -4,8 +4,8 @@ me.avatar = "https://lh6.googleusercontent.com/-lr2nyjhhjXw/AAAAAAAAAAI/AAAAAAAA
 var you = {};
 you.avatar = "https://a11.t26.net/taringa/avatares/9/1/2/F/7/8/Demon_King1/48x48_5C5.jpg";
 var botspeak = false;
-var bingClientTTS = new BingSpeech.TTSClient("018cfaf12bd9423cb2f3c7751ef0f436", BingSpeech.SupportedLocales.enUS_Female);
-var bingClientSR = new BingSpeech.RecognitionClient("018cfaf12bd9423cb2f3c7751ef0f436");
+var bingClientTTS = new BingSpeech.TTSClient("caf7cb90867640528f7f7b8c8f033b67", BingSpeech.SupportedLocales.enUS_Female);
+var bingClientSR = new BingSpeech.RecognitionClient("caf7cb90867640528f7f7b8c8f033b67");
 var recordstate = false;
 
 function formatAMPM(date) {
@@ -59,17 +59,20 @@ function resetChat(){
 function setluismsg(text) {
     var params = {
             // These are optional request parameters. They are set to their default values.
-            "q" : text,
+            "query" : text,
             "timezoneOffset": "0",
-            "verbose": "false",
+            "verbose": "true",
             "spellCheck": "false",
             "staging": "false",
+            "subscription-key":"71243c9bc0ff4b8794b3a5ae060ea564",
+            "show-all-intents":"true"
         };
         $.ajax({
-            url: "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/f595017d-1f62-4b0e-bf07-c8af20b56239?" + $.param(params),
+            url: "https://westus.api.cognitive.microsoft.com/luis/prediction/v3.0/apps/f18120e7-1a2d-4ad5-8103-15b770a9a819/slots/production/predict?" + $.param(params),
             beforeSend: function(xhrObj){
                 // Request headers
-                xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key","7ff0db3a38c64081ab77c753bfb00ef3");
+               // xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key","71243c9bc0ff4b8794b3a5ae060ea564");
+
             },
             type: "GET",
             // The request body may be empty for a GET request
@@ -77,37 +80,37 @@ function setluismsg(text) {
         })
         .done(function(data) {
             // Display a popup containing the top intent
-            if(data.topScoringIntent.intent === "Hello") {
+            if(data.prediction.topIntent === "Hello") {
             	insertChat("me",$("meta[name='defaultmsg']").attr("content"));
             	if(botspeak) {
             		bingClientTTS.synthesize("Hi! Have anything to ask about the document? I can brief you about the document, list the dated events, and point the important words in it.");
             	}
             }
-            if(data.topScoringIntent.intent === "Type") {
+            if(data.prediction.topIntent === "Type") {
                 insertChat("me","The case is of type : " + $("meta[name='category']").attr("content"));
                 if(botspeak) {
                     bingClientTTS.synthesize("The case is of type " + $("meta[name='category']").attr("content"));
                 }
             }
-            if(data.topScoringIntent.intent === "Persons") {
+            if(data.prediction.topIntent === "Persons") {
                 insertChat("me","The individuals involved are : " + $("meta[name='persons']").attr("content"));
                 if(botspeak) {
                     bingClientTTS.synthesize("The individuals involved are : " + $("meta[name='persons']").attr("content"));
                 }
             }
-            if(data.topScoringIntent.intent === "Orgs") {
+            if(data.prediction.topIntent === "Orgs") {
                 insertChat("me","The organisations involved are : " + $("meta[name='orgs']").attr("content"));
                 if(botspeak) {
                     bingClientTTS.synthesize("The organisations involved are : " + $("meta[name='orgs']").attr("content"));
                 }
             }
-            if(data.topScoringIntent.intent === "Locs") {
+            if(data.prediction.topIntent === "Locs") {
                 insertChat("me","The locations involved are : " + $("meta[name='locs']").attr("content"));
                 if(botspeak) {
                     bingClientTTS.synthesize("The locations involved are : " + $("meta[name='locs']").attr("content"));
                 }
             }
-            if(data.topScoringIntent.intent === "Date") {
+            if(data.prediction.topIntent === "Date") {
                 insertChat("me","Here are the dated events<br>" + $("meta[name='chatdates']").attr("content"));
                 if(botspeak) {
                     bingClientTTS.synthesize("Here are the dated events");
@@ -126,7 +129,7 @@ function setluismsg(text) {
                     }
                 }
             }
-            if(data.topScoringIntent.intent === "Shortsummary") {
+            if(data.prediction.topIntent === "Shortsummary") {
                 insertChat("me","Here's a quick rundown<br>" + $("meta[name='chatshortsummary']").attr("content"));
                 if(botspeak) {
                     bingClientTTS.synthesize("Here's a quick rundown");
@@ -145,7 +148,7 @@ function setluismsg(text) {
                     }
                 }
             }
-            if(data.topScoringIntent.intent === "Keypoints") {
+            if(data.prediction.topIntent === "Keypoints") {
                 insertChat("me","Watch out for these points when reading the whole thing<br>" + $("meta[name='chatkeywords']").attr("content"));
                 if(botspeak) {
                     bingClientTTS.synthesize("Watch out for these key points when reading the whole thing");
@@ -161,7 +164,7 @@ function setluismsg(text) {
                 }
 
             }
-            if(data.topScoringIntent.intent === "None") {
+            if(data.prediction.topIntent === "None") {
                 insertChat("me","Sorry I didn't understand, please ask again");
                 if(botspeak) {
                     bingClientTTS.synthesize("Sorry, I didn't understand, please ask again");

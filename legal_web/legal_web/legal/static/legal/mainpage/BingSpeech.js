@@ -103,6 +103,18 @@ var BingSpeech;
             };
             window.addEventListener('touchend', unlockaudio, false);
         }
+        /**setluismsg() {
+            $.post("https://centralindia.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
+            {
+                "Ocp-Apim-Subscription-Key": this.apiKey,
+                "Access-Control-Allow-Origin": "*"
+            },
+            function(data){
+                console.log(data);
+                newAuthToken = data;
+                alert("Data: " + data);
+            });
+        }**/
         checkAuthToken() {
             return __awaiter(this, void 0, void 0, function* () {
                 var timeElapsed = (Date.now() - this._tokenTime) / 1000;
@@ -114,7 +126,7 @@ var BingSpeech;
                         // required for Firefox otherwise a CORS error is raised
                         { name: "Access-Control-Allow-Origin", value: "*" }];
                     try {
-                        var resultsText = yield this.makeHttpRequest("POST", "https://api.cognitive.microsoft.com/sts/v1.0/issueToken", false, optionalHeaders);
+                        var resultsText = yield this.makeHttpRequest("POST", "https://centralindia.api.cognitive.microsoft.com/sts/v1.0/issuetoken", optionalHeaders);
                         newAuthToken = resultsText;
                         this._tokenTime = Date.now();
                         console.log("New authentication token generated.");
@@ -126,6 +138,8 @@ var BingSpeech;
                 }
             });
         }
+       
+
         makeHttpRequest(actionType, url, isArrayBuffer = false, optionalHeaders, dataToSend) {
             return __awaiter(this, void 0, void 0, function* () {
                 return new Promise((resolve, reject) => {
@@ -168,6 +182,39 @@ var BingSpeech;
                 });
             });
         }
+        /*
+        makeHttpRequest(actionType, url, optionalHeaders, dataToSend)
+        {
+            return __awaiter(this, void 0, void 0, function* () {
+                return new Promise((resolve, reject) => {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function (event) {
+                        if (xhr.readyState !== 4)
+                            return;
+                        else {
+                            reject(xhr.status);
+                        }
+                    };
+                    try {
+                        xhr.open(actionType, url, true);
+                        if (optionalHeaders) {
+                            optionalHeaders.forEach((header) => {
+                                xhr.setRequestHeader(header.name, header.value);
+                            });
+                        }
+                        if (dataToSend) {
+                            xhr.send(dataToSend);
+                        }
+                        else {
+                            xhr.send();
+                        }
+                    }
+                    catch (ex) {
+                        reject(ex);
+                    }
+                });
+            });
+        }*/
     }
     class Guid {
         static generateString() {
@@ -281,7 +328,7 @@ var BingSpeech;
                 try {
                     var blob = new Blob([audio], { type: 'audio/wav' });
                     var requestParameters = "?scenarios=smd&appid=D4D52672-91D7-4C74-8AD8-42B1D98141A5&locale=" + this._locale + "&device.os=wp7&version=3.0&format=json&instanceid=b2c95ede-97eb-4c88-81e4-80f32d6aee54&requestid=" + requestId;
-                    response = yield this._tools.makeHttpRequest("POST", "https://speech.platform.bing.com/recognize" + requestParameters, false, optionalHeaders, blob);
+                    response = yield this._tools.makeHttpRequest("POST", "https://centralindia.api.cognitive.microsoft.com/sts/v1.0/issuetoken" + requestParameters, optionalHeaders, blob);
                     var parsedReponse = JSON.parse(response);
                     if (parsedReponse.header && parsedReponse.header.status !== "error") {
                         textAnswer = parsedReponse.header.name;
@@ -404,7 +451,7 @@ var BingSpeech;
                     { name: "Ocp-Apim-Subscription-Key", value: this._tools.apiKey }];
                 var SSML = this.makeSSML(text, locale);
                 try {
-                    var blobReponse = yield this._tools.makeHttpRequest("POST", "https://speech.platform.bing.com/synthesize", true, optionalHeaders, SSML);
+                    var blobReponse = yield this._tools.makeHttpRequest("POST", "https://centralindia.api.cognitive.microsoft.com/sts/v1.0/issuetoken", optionalHeaders, SSML);
                 }
                 catch (ex) {
                     console.warn("Error while calling Bing Speech API. Ignoring this item: '" + text + "'");

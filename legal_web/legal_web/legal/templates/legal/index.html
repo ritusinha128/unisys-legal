@@ -134,7 +134,10 @@
       <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
-            <h2 class="section-heading">Summary of {{filename}}</h2>
+            <h2 class="section-heading">Abstractive Summary of {{filename}}</h2>
+            <hr class="my-4">
+            <p class="mb-5" style="overflow-y: auto; height:500px;">{{summary|safe}}</p>
+            <h2 class="section-heading">Extractive Summary of {{filename}}</h2>
             <hr class="my-4">
             <p class="mb-5" style="overflow-y: auto; height:500px;">{{summary|safe}}</p>
           </div>
